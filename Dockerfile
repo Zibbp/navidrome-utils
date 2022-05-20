@@ -6,7 +6,7 @@ ADD . /app
 
 WORKDIR /app
 
-RUN CGO_ENABLED=1 GOOS=linux go build -o app main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -o app /app/cmd/main.go
 
 FROM debian:bullseye-slim AS production
 
