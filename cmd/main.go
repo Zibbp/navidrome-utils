@@ -30,14 +30,14 @@ func main() {
 		// For loop each track
 		for _, track := range playlist.Tracks {
 
-			track, err := db.FindTrack(track.Title, track.Artist)
+			foundTrack, err := db.FindTrack(track.Title, track.Artist)
 			if err != nil {
-				log.Fatal("Error finding track: ", err)
+				log.Errorf("Error finding track: %s - %s - with error: %s", track.Title, track.Artist, err)
 			}
-			if track != "" {
+			if foundTrack != "" {
 				log.Debugf("Found track in Navidrome database %s", track)
 
-				err := file.CheckTrackInM3UPlaylist(track, playlist.Name)
+				err := file.CheckTrackInM3UPlaylist(foundTrack, playlist.Name)
 				if err != nil {
 					log.Fatal("Error adding track to M3U playlist: ", err)
 				}
