@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/flytam/filenamify"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/zibbp/navidrome-utils/internal/navidrome"
@@ -58,7 +59,11 @@ func ReadPlaylistFile(name string) (navidrome.Playlist, error) {
 
 func CreateM3UPlaylistFile(name string) error {
 	// check if file exits if not create it
-	filePath := fmt.Sprintf("/playlists/%s.m3u", name)
+	safeFileName, err := filenamify.Filenamify(name, filenamify.Options{Replacement: "-"})
+	if err != nil {
+		log.Fatal("Error creating safe file name: ", err)
+	}
+	filePath := fmt.Sprintf("/playlists/%s.m3u", safeFileName)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		file, err := os.Create(filePath)
 		if err != nil {
@@ -76,7 +81,11 @@ func CreateM3UPlaylistFile(name string) error {
 
 func CheckTrackInM3UPlaylist(track string, playlist string) error {
 	// Append track to file if not already in file
-	filePath := fmt.Sprintf("/playlists/%s.m3u", playlist)
+	safeFileName, err := filenamify.Filenamify(playlist, filenamify.Options{Replacement: "-"})
+	if err != nil {
+		log.Fatal("Error creating safe file name: ", err)
+	}
+	filePath := fmt.Sprintf("/playlists/%s.m3u", safeFileName)
 
 	file, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -88,7 +97,7 @@ func CheckTrackInM3UPlaylist(track string, playlist string) error {
 
 	if !strings.Contains(s, track) {
 		log.Debugf("Adding track %s to playlist %s", track, playlist)
-		err := addTrackToM3UPlaylist(track, playlist)
+		err := addTrackToM3UPlaylist(track, safeFileName)
 		if err != nil {
 			log.Fatal("Error adding track to m3u playlist file: ", err)
 			return err
