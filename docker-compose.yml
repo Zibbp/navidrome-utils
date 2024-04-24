@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+  navidrome-utils:
+    container_name: navidrome-utils
+    image: ghcr.io/zibbp/navidrome-utils:master
+    ports:
+      - 28543:28542
+    volumes:
+      - ./data:/data
+      - ./navidrome:/navidrome
+      - ./playlists:/playlists
+      # Uncomment the below if you would like to use a custom start.sh script
+      #- ./exec:/exec
