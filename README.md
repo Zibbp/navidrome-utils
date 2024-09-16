@@ -1,16 +1,11 @@
 # Navidrome Utils
 
-Currently has one function which is creating M3U playlist files from Navidrome's database.
+Create M3U playlists from a JSON input using tracks in the Navidrome database.
 
-### How It Works
+The `navidrome-isrc` branch will not function on all navidrome instances, it requires a modification to parse ISRC tags.
 
-JSON playlist files are read which contain tracks for that playlist. Each trach is searched against the Navidrome database and if it is found, the track is added to the M3U playlist file.
+## Paths
 
-### How to run
-Check out this repository. Grab your navidrome.db (SQLite) file and place it inside the navidrome folder in the repository.
-Copy the generated data directory from tidal-utils inside the repository's directory.
-
-Start the software via `docker-compose up`.
-Watch it go to work.
-
-The playlists directory will contain your playlist files once it's done.
+- `/data/navidrome`: mount to navidrome's data directory that contains the sqlite database
+- `/data/playlists/input`: mount to JSON playlist files
+- `/data/playlists/output`: mount to export of M3U files

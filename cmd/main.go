@@ -3,47 +3,64 @@ package main
 import (
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	"log/slog"
+
 	"github.com/zibbp/navidrome-utils/internal/database"
 	"github.com/zibbp/navidrome-utils/internal/file"
 )
 
 func main() {
-	if os.Getenv("DEBUG") == "true" {
-		log.SetLevel(log.DebugLevel)
-	}
 	// DB
 	db, err := database.Setup()
+	if err != nil {
+		slog.Error("Error setting up database", "error", err)
+		os.Exit(1)
+	}
+	defer db.DB.Close()
 
 	playlists, err := file.ReadPlaylistFiles()
 	if err != nil {
-		log.Fatal("Error reading playlist files: ", err)
+		slog.Error("Error reading playlist files", "error", err)
+		os.Exit(1)
 	}
 	// For loop each playlist
 	for _, playlist := range playlists {
 		// Create the M3U playlist
 		err := file.CreateM3UPlaylistFile(playlist.Name)
 		if err != nil {
-			log.Fatal("Error creating M3U playlist file: ", err)
+			slog.Error("Error creating M3U playlist file", "error", err)
+			os.Exit(1)
 		}
-		log.Infof("Processing playlist %s which has %d tracks", playlist.Name, len(playlist.Tracks))
+		slog.Info("Created M3U playlist file", "name", playlist.Name)
 		// For loop each track
 		for _, track := range playlist.Tracks {
 
-			foundTrack, err := db.FindTrack(track.Title, track.Artist)
-			if err != nil {
-				log.Errorf("Error finding track: %s - %s - with error: %s", track.Title, track.Artist, err)
-			}
-			if foundTrack != "" {
-				log.Debugf("Found track in Navidrome database %s", track)
-
-				err := file.CheckTrackInM3UPlaylist(foundTrack, playlist.Name)
+			navidromeTrack := ""
+			if track.ISRC != "" {
+				navidromeTrack, err = db.FindTrackByISRC(track.ISRC)
 				if err != nil {
-					log.Fatal("Error adding track to M3U playlist: ", err)
+					slog.Error("Error finding track by ISRC", "isrc", track.ISRC, "error", err)
 				}
 			}
+			// try alternate search to find track
+			if navidromeTrack == "" {
+				navidromeTrack, err = db.FindTrackByTitle(track.Title, track.Artist)
+				if err != nil {
+					slog.Error("Error finding track by title and artist", "title", track.Title, "artist", track.Artist, "error", err)
+				}
+			}
+			if navidromeTrack != "" {
+				err := file.CheckTrackInM3UPlaylist(navidromeTrack, playlist.Name)
+				if err != nil {
+					slog.Error("Error adding track to M3U playlist", "track", navidromeTrack, "error", err)
+				}
+				continue
+			} else {
+				slog.Info("Track not found", "title", track.Title)
+			}
 		}
-		log.Infof("Finished processing playlist %s", playlist.Name)
+
+		slog.Info("Finished processing playlist", "playlist", playlist.Name)
 	}
 
 }

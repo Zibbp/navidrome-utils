@@ -1,3 +1,0 @@
-# Ignore all files inside, but commit the folder
-*
-!.gitignore

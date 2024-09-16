@@ -13,7 +13,7 @@ type Database struct {
 
 func Setup() (*Database, error) {
 	log.Print("Connecting to Navidrome database.")
-	db, err := sql.Open("sqlite3", "/navidrome/navidrome.db")
+	db, err := sql.Open("sqlite3", "/data/navidrome/navidrome.db")
 
 	if err != nil {
 		log.Fatal("Error opening database: ", err)
@@ -22,7 +22,17 @@ func Setup() (*Database, error) {
 	return &Database{DB: db}, nil
 }
 
-func (d *Database) FindTrack(title, artist string) (string, error) {
+func (d *Database) FindTrackByISRC(isrc string) (string, error) {
+	var path string
+	err := d.DB.QueryRow("SELECT path FROM media_file WHERE isrc = ?", isrc).Scan(&path)
+	if err != nil {
+		log.Print("Error finding track: ", err)
+		return "", err
+	}
+	return path, nil
+}
+
+func (d *Database) FindTrackByTitle(title, artist string) (string, error) {
 	var path string
 	err := d.DB.QueryRow("SELECT path FROM media_file WHERE title LIKE ? AND artist LIKE ?", "%"+title+"%", "%"+artist+"%").Scan(&path)
 	if err != nil {
