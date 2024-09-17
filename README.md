@@ -1,3 +1,7 @@
+# Important
+
+This repository will not receive any updates until `isrc` tags are supportd in Navidrome. Searching by track titles, artists, and albums is not the best. The [maintainer is working on a scanner refactor](https://github.com/navidrome/navidrome/pull/2709) which will support `isrc` tags. Once this is released the logic can be simiplied by searching for the `isrc` tag.
+
 # Navidrome Utils
 
 Currently has one function which is creating M3U playlist files from Navidrome's database.
