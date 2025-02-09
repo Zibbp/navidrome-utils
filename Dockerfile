@@ -10,6 +10,10 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o app /app/cmd/main.go
 
 FROM debian:bullseye-slim AS production
 
+RUN apt update && apt install -y --upgrade ca-certificates
+
+RUN update-ca-certificates
+
 COPY --from=builder /app .
 
 CMD ["./app"]
