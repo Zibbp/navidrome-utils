@@ -14,11 +14,11 @@ import (
 	"github.com/zibbp/navidrome-utils/internal/navidrome"
 )
 
-func ReadPlaylistFiles() ([]navidrome.Playlist, error) {
-	var playlists []navidrome.Playlist
+func ReadPlaylistFiles(path string) ([]navidrome.ImportPlaylist, error) {
+	var playlists []navidrome.ImportPlaylist
 
 	// Get all files in the playlist directory
-	files, err := os.ReadDir("/data/playlists/input")
+	files, err := os.ReadDir(path)
 	if err != nil {
 		slog.Error("Error reading playlist files", "error", err)
 		return nil, err
@@ -26,7 +26,7 @@ func ReadPlaylistFiles() ([]navidrome.Playlist, error) {
 	// Loop over each file
 	for _, file := range files {
 		// Read the file
-		playlist, err := ReadPlaylistFile(file.Name())
+		playlist, err := ReadPlaylistFile(fmt.Sprintf("%s/%s", path, file.Name()))
 		if err != nil {
 			slog.Error("Error reading playlist file", "error", err)
 			return nil, err
@@ -38,11 +38,11 @@ func ReadPlaylistFiles() ([]navidrome.Playlist, error) {
 	return playlists, nil
 }
 
-func ReadPlaylistFile(name string) (navidrome.Playlist, error) {
-	var playlist navidrome.Playlist
+func ReadPlaylistFile(filePath string) (navidrome.ImportPlaylist, error) {
+	var playlist navidrome.ImportPlaylist
 
 	// Read the file
-	data, err := os.ReadFile("/data/playlists/input/" + name)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		slog.Error("Error reading playlist file", "error", err)
 		return playlist, err

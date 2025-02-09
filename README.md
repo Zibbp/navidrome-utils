@@ -1,11 +1,14 @@
 # Navidrome Utils
 
-Create M3U playlists from a JSON input using tracks in the Navidrome database.
+Creates playlists in Navidrome from a JSON file. This does not create a m3u playlist file, instead it uses the API to create and add tracks to playlists. This is so tracks can be added to the playlist by a human without it being overridden when run again.
 
-The `navidrome-isrc` branch will not function on all navidrome instances, it requires a modification to parse ISRC tags.
+## Docker
 
-## Paths
+To run this you will need the following.
 
-- `/data/navidrome`: mount to navidrome's data directory that contains the sqlite database
-- `/data/playlists/input`: mount to JSON playlist files
-- `/data/playlists/output`: mount to export of M3U files
+- JSON playlist files.
+  - In the format in `internal/navidrome/navidrome.go`.
+- Your Navidrome credentials.
+  - I recommened using a different account unless you want the playlists to be owned by you.
+
+Use the provided `docker-compose.yml` file to get started. Update the volumes to point to the Navidrome `data` directory (the one with the sqlite database) and the path to your JSON playlists. Update the environment variable with your Navidrome credentials.
