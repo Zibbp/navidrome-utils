@@ -117,7 +117,7 @@ func main() {
 		logger.Info().Msg("processing tracks")
 
 		// Get track ids current in playlist
-		navidromeTrackIdsInPlaylist, err := db.GetTrackIDsInPlaylist(navidromePlaylistId)
+		navidromeTrackIdsInPlaylist, err := navidromeClient.GetPlaylistTracks(ctx, navidromePlaylistId)
 		if err != nil {
 			logger.Error().Err(err).Msg("error getting tracks in navidrome playlist")
 			continue

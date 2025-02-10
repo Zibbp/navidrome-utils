@@ -82,6 +82,11 @@ type Playlist struct {
 	Tracks  []string `json:"tracks,omitempty"`
 }
 
+// PlaylistTrack represents a track in a playlist returned by the /api/playlist/{id}/tracks endpoint.
+type PlaylistTrack struct {
+	MediaFileID string `json:"mediaFileId"`
+}
+
 // -----------------------------
 // API Methods
 // -----------------------------
@@ -273,6 +278,41 @@ func (c *Client) GetPlaylistByID(ctx context.Context, playlistID string) (*Playl
 		return nil, err
 	}
 	return &playlist, nil
+}
+
+// GetPlaylistTracks fetches all tracks in a playlist from /api/playlist/{playlistID}/tracks.
+// It returns an array of PlaylistTrack objects.
+func (c *Client) GetPlaylistTracks(ctx context.Context, playlistID string) ([]string, error) {
+	url := fmt.Sprintf("%s/api/playlist/%s/tracks", c.BaseURL, playlistID)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	c.setAuthHeader(req)
+
+	resp, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("get playlist tracks failed: status %d, body: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	var tracks []PlaylistTrack
+	if err := json.NewDecoder(resp.Body).Decode(&tracks); err != nil {
+		return nil, err
+	}
+
+	var trackIds []string
+
+	for _, t := range tracks {
+		trackIds = append(trackIds, t.MediaFileID)
+	}
+
+	return trackIds, nil
 }
 
 // setAuthHeader adds the X-ND-Authorization header if an AuthToken is set.

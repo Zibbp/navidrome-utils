@@ -51,35 +51,6 @@ func (d *Database) GetTrackIDByIsrc(isrc string) (string, error) {
 	return id, tx.Commit()
 }
 
-func (d *Database) GetTrackIDsInPlaylist(playlistId string) ([]string, error) {
-	tx, err := d.DB.Begin()
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
-
-	var ids []string
-	rows, err := tx.Query("SELECT media_file_id FROM playlist_tracks WHERE playlist_id = ?", playlistId)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return ids, tx.Commit()
-}
-
 func (d *Database) GetTrackIDByTitleAndArtist(title, artist string) (string, error) {
 	tx, err := d.DB.Begin()
 	if err != nil {
